@@ -1,0 +1,45 @@
+package botf
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestNewRoundRobinConnections(t *testing.T) {
+	balancer, err := NewRoundRobinBalancer("localhost:8080", "localhost:8081")
+	if err != nil {
+		t.Error(err)
+	}
+	if len(balancer.Connections()) != 2 {
+		t.Errorf("expected 2 connections got %d", len(balancer.Connections()))
+	}
+}
+
+func TestBalancer(t *testing.T) {
+	visited := []int{}
+	s1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		visited = append(visited, 1)
+	}))
+	defer s1.Close()
+
+	s2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		visited = append(visited, 2)
+	}))
+	defer s2.Close()
+
+	balancer, err := NewRoundRobinBalancer(s1.URL, s2.URL)
+	if err != nil {
+		t.Error(err)
+	}
+
+	client := NewClient(balancer)
+	client.Get(s1.URL)
+	client.Get(s1.URL)
+	client.Get(s1.URL)
+
+	fmt.Println(visited)
+}
