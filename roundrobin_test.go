@@ -3,6 +3,7 @@ package botf
 import (
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -39,4 +40,8 @@ func TestBalancer(t *testing.T) {
 	client.Get(s1.URL)
 	client.Get(s1.URL)
 	client.Get(s1.URL)
+	expected := []int{1, 2, 1, 2, 1}
+	if !reflect.DeepEqual(visited, expected) {
+		t.Errorf("expecting visited to be %v got %v", expected, visited)
+	}
 }
