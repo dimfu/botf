@@ -7,7 +7,7 @@ import (
 )
 
 type RoundRobinBalancer struct {
-	conns []*url.URL
+	conns []Connection
 	sync.Mutex
 
 	// to keep track of current connection index as we move to the next list
@@ -16,7 +16,7 @@ type RoundRobinBalancer struct {
 
 func NewRoundRobinBalancer(urls ...string) (*RoundRobinBalancer, error) {
 	b := &RoundRobinBalancer{
-		conns: []*url.URL{},
+		conns: []Connection{},
 	}
 
 	if len(urls) == 0 {
@@ -28,23 +28,17 @@ func NewRoundRobinBalancer(urls ...string) (*RoundRobinBalancer, error) {
 		if err != nil {
 			return nil, err
 		}
-		b.conns = append(b.conns, parsedUrl)
+		b.conns = append(b.conns, NewConnection(parsedUrl))
 	}
 
 	return b, nil
 }
 
-// Returns all of the connections
-func (r *RoundRobinBalancer) Connections() []url.URL {
-	var urls []url.URL
-	for _, u := range r.conns {
-		urls = append(urls, *u)
-	}
-	return urls
+func (r *RoundRobinBalancer) Connections() []Connection {
+	return r.conns
 }
 
-// Returns the connection from the balancer that are selected using round robin arrangement
-func (r *RoundRobinBalancer) Get() *url.URL {
+func (r *RoundRobinBalancer) Get() Connection {
 	r.Lock()
 	defer r.Unlock()
 

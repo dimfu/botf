@@ -1,8 +1,9 @@
 package botf
 
-import "net/url"
-
 type Balancer interface {
-	Get() *url.URL
-	Connections() []url.URL
+	// Returns all of the connections
+	Get() Connection
+
+	// Returns the connection from the balancer that are selected using round robin arrangement
+	Connections() []Connection
 }

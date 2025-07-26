@@ -1,7 +1,6 @@
 package botf
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,14 +19,14 @@ func TestNewRoundRobinConnections(t *testing.T) {
 func TestBalancer(t *testing.T) {
 	visited := []int{}
 	s1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
 		visited = append(visited, 1)
+		w.WriteHeader(http.StatusOK)
 	}))
 	defer s1.Close()
 
 	s2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
 		visited = append(visited, 2)
+		w.WriteHeader(http.StatusOK)
 	}))
 	defer s2.Close()
 
@@ -40,6 +39,4 @@ func TestBalancer(t *testing.T) {
 	client.Get(s1.URL)
 	client.Get(s1.URL)
 	client.Get(s1.URL)
-
-	fmt.Println(visited)
 }
